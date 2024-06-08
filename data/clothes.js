@@ -19,7 +19,7 @@ const clothes = [
     id: 3,
     name: "TShirt",
     price: 20,
-    image: "tshirt1.webp",
+    image: "tshirt.webp",
     options: ["Blue", "Red", "Green"],
   },
   {
