@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clothes Search</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.7/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-gray-100 p-4">
+    <div id="app" class="max-w-4xl mx-auto">
+      <nav class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold">Brand Name</h1>
+        <ul class="flex space-x-4 font-semibold text-xl">
+          <li>
+            <a href="#" class="text-gray-800 hover:text-blue-500">Home</a>
+          </li>
+          <li>
+            <a href="#" class="text-gray-800 hover:text-blue-500">Products</a>
+          </li>
+          <li>
+            <a href="#" class="text-gray-800 hover:text-blue-500">About</a>
+          </li>
+          <li>
+            <a href="#" class="text-gray-800 hover:text-blue-500">Contact</a>
+          </li>
+        </ul>
+      </nav>
+      <h1 class="text-2xl font-bold mb-8 text-center">Clothes Search</h1>
+      <h2 class="text-xl text-center m-10 font-semibold text-gray-600">
+        To search the clothes type keyword : Jeans, Tshirt, Dress, Jacket,
+        Sweater.....
+      </h2>
+      <input
+        type="text"
+        v-model="query"
+        @input="search"
+        placeholder="Search for clothes..."
+        class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300 mb-8"
+      />
+      <div
+        v-if="showResults"
+        class="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-8"
+      >
+        <div
+          v-for="cloth in clothes"
+          :key="cloth.id"
+          class="flex font-sans bg-white rounded-lg shadow-md overflow-hidden"
+        >
+          <div class="flex-none w-48 relative">
+            <img
+              :src="cloth.image ? './images/' + cloth.image : './images/Dress.jpeg'"
+              :alt="cloth.name"
+              class="absolute inset-0 w-full h-full object-cover"
+              loading="lazy"
+            />
+          </div>
+          <div class="flex-auto p-6">
+            <div class="flex flex-wrap">
+              <h1 class="flex-auto text-lg font-semibold text-slate-900">
+                {{ cloth.name || 'Dress' }}
+              </h1>
+              <div class="text-lg font-semibold text-slate-500">
+                ₹{{ cloth.price !== undefined ? cloth.price : '1000' }}
+              </div>
+              <div
+                class="w-full flex-none text-sm font-medium text-slate-700 mt-2"
+              >
+                In stock
+              </div>
+            </div>
+            <div
+              class="flex items-baseline mt-4 mb-6 pb-6 border-b border-slate-200"
+            >
+              <div class="space-x-2 flex text-sm">
+                <label v-for="(option, index) in cloth.options" :key="index">
+                  <input
+                    class="sr-only peer"
+                    name="size"
+                    type="radio"
+                    :value="option"
+                  />
+                  <div
+                    class="w-9 h-9 rounded-lg flex items-center justify-center text-slate-700 peer-checked:font-semibold peer-checked:bg-slate-900 peer-checked:text-white"
+                  >
+                    {{ option }}
+                  </div>
+                </label>
+              </div>
+            </div>
+            <div class="flex space-x-4 mb-6 text-sm font-medium">
+              <div class="flex-auto flex space-x-4">
+                <button
+                  class="h-10 px-6 font-semibold rounded-md bg-black text-white"
+                  type="button"
+                >
+                  Buy now
+                </button>
+                <button
+                  class="h-10 px-6 font-semibold rounded-md border border-slate-200 text-slate-900"
+                  type="button"
+                >
+                  Add to cart
+                </button>
+              </div>
+              <button
+                class="flex-none flex items-center justify-center w-9 h-9 rounded-md text-slate-300 border border-slate-200"
+                type="button"
+                aria-label="Like"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    clip-rule="evenodd"
+                    d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
+                  />
+                </svg>
+              </button>
+            </div>
+            <p class="text-sm text-slate-700">
+              Free shipping on all continental orders.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
+    <script>
+      new Vue({
+        el: "#app",
+        data: {
+          query: "",
+          clothes: [],
+          showResults: false,
+        },
+        mounted() {
+          this.searchAllClothes();
+        },
+        methods: {
+          async search() {
+            if (this.query.length > 3) {
+              try {
+                const response = await fetch(
+                  `http://localhost:5000/search?q=${this.query}`
+                );
+                const data = await response.json();
+                this.clothes = data;
+                this.showResults = true;
+              } catch (error) {
+                console.error("Error fetching clothes:", error);
+              }
+            } else {
+              this.showResults = false;
+            }
+          },
+          async searchAllClothes() {
+            try {
+              const response = await fetch("http://localhost:5000/search");
+              const data = await response.json();
+              this.clothes = data;
+              this.showResults = true;
+            } catch (error) {
+              console.error("Error fetching all clothes:", error);
+            }
+          },
+        },
+      });
+    </script>
+  </body>
+</html>
